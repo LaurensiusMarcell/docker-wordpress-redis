@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # Konfigurasi Database MySQL
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: wppassword
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # Konfigurasi WordPress
+  wordpress:
+    image: wordpress:latest
+    ports:
+      - "8000:80"
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: wppassword
+      WORDPRESS_DB_NAME: wordpress
+      # Menambahkan konfigurasi Redis secara otomatis ke wp-config.php
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_REDIS_HOST', 'redis');
+        define('WP_REDIS_PORT', '6379');
+    volumes:
+      # Memetakan folder 'wp-app' di komputer Anda ke folder HTML di dalam container
+      - ./wp-app:/var/www/html
+    depends_on:
+      - db
+      - redis
+
+  # Konfigurasi Redis Cache
+  redis:
+    image: redis:alpine
+    restart: always
+
+# Menyimpan data database agar tidak hilang
+volumes:
+  db_data:

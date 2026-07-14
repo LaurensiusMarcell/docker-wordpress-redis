@@ -1,0 +1,4 @@
+# Mengabaikan file sistem operasi
+.DS_Store
+Thumbs.db
+*.log
